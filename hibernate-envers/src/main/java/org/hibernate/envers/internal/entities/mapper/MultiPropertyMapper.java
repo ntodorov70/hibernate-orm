@@ -139,6 +139,16 @@ public class MultiPropertyMapper extends AbstractPropertyMapper implements Exten
 									newObj == null ? null : getter.get( newObj ),
 									oldObj == null ? null : getter.get( oldObj )
 							);
+                            // fix missing modifiedFlag support for embedded entities
+                            if (propertyData.isUsingModifiedFlag() &&
+                                propertyMapper instanceof SinglePropertyMapper) {
+                                SinglePropertyMapper singlePropertyMapper = ((SinglePropertyMapper) propertyMapper);
+                                singlePropertyMapper.mapModifiedFlagsToMapFromEntity(
+                                    session, data,
+                                    newObj == null ? null : getter.get(newObj),
+                                    oldObj == null ? null : getter.get(oldObj)
+                                );
+                            }
 						}
 						return ret;
 					}
