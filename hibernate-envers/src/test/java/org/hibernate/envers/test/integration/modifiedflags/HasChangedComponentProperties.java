@@ -6,8 +6,9 @@
  */
 package org.hibernate.envers.test.integration.modifiedflags;
 
-import java.util.List;
-import javax.persistence.EntityManager;
+import static junit.framework.Assert.assertEquals;
+import static org.hibernate.envers.test.tools.TestTools.extractRevisionNumbers;
+import static org.hibernate.envers.test.tools.TestTools.makeList;
 
 import org.hibernate.envers.test.Priority;
 import org.hibernate.envers.test.entities.components.Component1;
@@ -16,19 +17,22 @@ import org.hibernate.envers.test.entities.components.ComponentTestEntity;
 import org.hibernate.envers.test.tools.TestTools;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static org.hibernate.envers.test.tools.TestTools.extractRevisionNumbers;
-import static org.hibernate.envers.test.tools.TestTools.makeList;
+import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * @author Adam Warski (adam at warski dot org)
  * @author Michal Skowronek (mskowr at o2 dot pl)
  */
-public class HasChangedComponents extends AbstractModifiedFlagsEntityTest {
+public class HasChangedComponentProperties extends AbstractModifiedFlagsEntityTest {
 	private Integer id1;
 	private Integer id2;
 	private Integer id3;
 	private Integer id4;
+
+	public boolean forceModifiedFlags() {
+		return false;
+	}
 
 	@Override
 	protected Class<?>[] getAnnotatedClasses() {
@@ -118,7 +122,7 @@ public class HasChangedComponents extends AbstractModifiedFlagsEntityTest {
 	@Test
 	public void testModFlagProperties() {
 		assertEquals(
-				TestTools.makeSet( "comp1_MOD" ,"comp1_str1_MOD"),
+				TestTools.makeSet( "comp1_MOD", "comp1_str1_MOD" ),
 				TestTools.extractModProperties(
 						metadata().getEntityBinding(
 								"org.hibernate.envers.test.entities.components.ComponentTestEntity_AUD"
@@ -138,38 +142,14 @@ public class HasChangedComponents extends AbstractModifiedFlagsEntityTest {
 		assertEquals( 2, list.size() );
 		assertEquals( makeList( 1, 2 ), extractRevisionNumbers( list ) );
 
+		list = queryForPropertyHasChanged( ComponentTestEntity.class, id1, "comp1_str1" );
+		assertEquals( 2, list.size() );
+
+		list = queryForPropertyHasNotChanged( ComponentTestEntity.class, id1, "comp1_str1" );
+		assertEquals( 0, list.size() );
+
 		list = queryForPropertyHasNotChanged( ComponentTestEntity.class, id1, "comp1" );
 		assertEquals( 0, list.size() );
 	}
 
-	@Test
-	public void testHasChangedId2() throws Exception {
-		List list = queryForPropertyHasChangedWithDeleted( ComponentTestEntity.class, id2, "comp1" );
-		assertEquals( 3, list.size() );
-		assertEquals( makeList( 1, 2, 4 ), extractRevisionNumbers( list ) );
-
-		list = queryForPropertyHasNotChangedWithDeleted( ComponentTestEntity.class, id2, "comp1" );
-		assertEquals( 0, list.size() );
-	}
-
-	@Test
-	public void testHasChangedId3() throws Exception {
-		List list = queryForPropertyHasChangedWithDeleted( ComponentTestEntity.class, id3, "comp1" );
-		assertEquals( 2, list.size() );
-		assertEquals( makeList( 1, 3 ), extractRevisionNumbers( list ) );
-
-		list = queryForPropertyHasNotChangedWithDeleted( ComponentTestEntity.class, id3, "comp1" );
-		assertEquals( 0, list.size() );
-	}
-
-	@Test
-	public void testHasChangedId4() throws Exception {
-		List list = queryForPropertyHasChangedWithDeleted( ComponentTestEntity.class, id4, "comp1" );
-		assertEquals( 2, list.size() );
-		assertEquals( makeList( 2, 3 ), extractRevisionNumbers( list ) );
-
-		list = queryForPropertyHasNotChangedWithDeleted( ComponentTestEntity.class, id4, "comp1" );
-		assertEquals( 1, list.size() );
-		assertEquals( makeList( 1 ), extractRevisionNumbers( list ) );
-	}
 }

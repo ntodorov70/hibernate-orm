@@ -6,6 +6,8 @@
  */
 package org.hibernate.envers.test.entities.components;
 
+import org.hibernate.envers.Audited;
+
 import javax.persistence.Embeddable;
 
 /**
@@ -13,6 +15,7 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class Component1 {
+	@Audited(withModifiedFlag = true)
 	private String str1;
 
 	private String str2;

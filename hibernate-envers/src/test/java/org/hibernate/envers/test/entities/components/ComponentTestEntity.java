@@ -25,7 +25,7 @@ public class ComponentTestEntity {
 	private Integer id;
 
 	@Embedded
-	@Audited
+	@Audited(withModifiedFlag = true)
 	private Component1 comp1;
 
 	@Embedded
