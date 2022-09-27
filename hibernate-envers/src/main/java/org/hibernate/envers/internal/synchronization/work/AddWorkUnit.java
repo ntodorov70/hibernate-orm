@@ -134,14 +134,13 @@ public class AddWorkUnit extends AbstractAuditWorkUnit implements AuditWorkUnit 
 	}
 
 	private void mergeModifiedFlags(Map<String, Object> lhs, Map<String, Object> rhs, PropertyData propertyData) {
-		if (!propertyData.isUsingModifiedFlag() || propertyData.isSynthetic()) {
-			return;
-		}
-		Boolean lhsValue = (Boolean) lhs.get(propertyData.getModifiedFlagPropertyName());
-		if (lhsValue != null && lhsValue) {
-			Boolean rhsValue = (Boolean) rhs.get(propertyData.getModifiedFlagPropertyName());
-			if (rhsValue == null || !rhsValue) {
-				rhs.put(propertyData.getModifiedFlagPropertyName(), true);
+		if ( propertyData.isUsingModifiedFlag() && !propertyData.isSynthetic() ) {
+			Boolean lhsValue = (Boolean) lhs.get( propertyData.getModifiedFlagPropertyName() );
+			if ( lhsValue != null && lhsValue ) {
+				Boolean rhsValue = (Boolean) rhs.get( propertyData.getModifiedFlagPropertyName() );
+				if ( rhsValue == null || !rhsValue ) {
+					rhs.put( propertyData.getModifiedFlagPropertyName(), true );
+				}
 			}
 		}
 	}
