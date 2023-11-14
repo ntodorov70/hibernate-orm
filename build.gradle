@@ -196,6 +196,11 @@ class HibernateVersion {
 	}
 }
 
+// ignore javadoc for now, due to local issues
+subprojects {
+	tasks.withType(Javadoc).all { enabled = false }
+}
+
 //idea {
 //    project {
 //		jdkName = gradle.ext.baselineJavaVersion

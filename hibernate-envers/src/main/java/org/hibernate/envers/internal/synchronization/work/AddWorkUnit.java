@@ -14,7 +14,9 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.internal.entities.PropertyData;
+import org.hibernate.envers.internal.entities.mapper.ComponentPropertyMapper;
 import org.hibernate.envers.internal.entities.mapper.ExtendedPropertyMapper;
+import org.hibernate.envers.internal.entities.mapper.PropertyMapper;
 import org.hibernate.envers.internal.tools.ArraysTools;
 import org.hibernate.persister.entity.EntityPersister;
 
@@ -117,16 +119,29 @@ public class AddWorkUnit extends AbstractAuditWorkUnit implements AuditWorkUnit 
 		// This makes sure that when merging ModAuditWork with AddWorkUnit within the same transaction for the
 		// same entity that the modified flags are tracked correctly.
 		for ( PropertyData propertyData : mapper.getProperties().keySet() ) {
-			if ( propertyData.isUsingModifiedFlag() && !propertyData.isSynthetic() ) {
-				Boolean lhsValue = (Boolean) lhs.get( propertyData.getModifiedFlagPropertyName() );
-				if ( lhsValue != null && lhsValue ) {
-					Boolean rhsValue = (Boolean) rhs.get( propertyData.getModifiedFlagPropertyName() );
-					if ( rhsValue == null || !rhsValue ) {
-						rhs.put( propertyData.getModifiedFlagPropertyName(), true );
-					}
+			mergeModifiedFlags(lhs, rhs, propertyData);
+
+			// in case the property is a component go trough his properties as well
+			PropertyMapper propertyMapper = mapper.getProperties().get(propertyData);
+			if (propertyMapper instanceof ComponentPropertyMapper) {
+				for (PropertyData componentPropertyData : ((ComponentPropertyMapper) propertyMapper).getProperties().keySet()) {
+					mergeModifiedFlags(lhs, rhs, componentPropertyData);
 				}
 			}
 		}
+
 		return rhs;
+	}
+
+	private void mergeModifiedFlags(Map<String, Object> lhs, Map<String, Object> rhs, PropertyData propertyData) {
+		if ( propertyData.isUsingModifiedFlag() && !propertyData.isSynthetic() ) {
+			Boolean lhsValue = (Boolean) lhs.get( propertyData.getModifiedFlagPropertyName() );
+			if ( lhsValue != null && lhsValue ) {
+				Boolean rhsValue = (Boolean) rhs.get( propertyData.getModifiedFlagPropertyName() );
+				if ( rhsValue == null || !rhsValue ) {
+					rhs.put( propertyData.getModifiedFlagPropertyName(), true );
+				}
+			}
+		}
 	}
 }

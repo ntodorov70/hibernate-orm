@@ -73,7 +73,7 @@ public final class ComponentMetadataGenerator {
 			if ( componentPropertyAuditingData != null ) {
 				mainGenerator.addValue(
 						parent, property.getValue(), componentMapper, entityName, xmlMappingData,
-						componentPropertyAuditingData, property.isInsertable(), firstPass, false
+						componentPropertyAuditingData, property.isInsertable(), firstPass, true // fix missing _mod columns in embeded entity parts.
 				);
 			}
 		}
